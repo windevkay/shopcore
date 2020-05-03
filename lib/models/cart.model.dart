@@ -44,7 +44,8 @@ class Cart extends ChangeNotifier {
             price: existingCartItem.price,
             quantity: existingCartItem.quantity + 1),
       );
-    } else {//create a new cart item and add to items
+    } else {
+      //create a new cart item and add to items
       _items.putIfAbsent(
           productId,
           () => CartItem(
@@ -55,6 +56,30 @@ class Cart extends ChangeNotifier {
 
   void removeItem(String productId) {
     _items.remove(productId);
+    notifyListeners();
+  }
+
+  void removeSingleItem(String productId) {
+    if (!_items.containsKey(productId)) {
+      return;
+    }
+    if (_items[productId].quantity > 1) {
+      _items.update(
+        productId,
+        (existingCartItem) => CartItem(
+            id: existingCartItem.id,
+            title: existingCartItem.title,
+            price: existingCartItem.price,
+            quantity: existingCartItem.quantity - 1),
+      );
+    } else {
+      _items.remove(productId);
+    }
+    notifyListeners();
+  }
+
+  void clear() {
+    _items = {};
     notifyListeners();
   }
 }

@@ -5,6 +5,7 @@ import '../widgets/productsGrid.widget.dart';
 import '../screens/cart.screen.dart';
 import '../models/cart.model.dart';
 import '../widgets/badge.widget.dart';
+import '../widgets/appDrawer.widget.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -57,6 +58,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ),
         ],
       ),
+      drawer: AppDrawer(),
       //using a grid view gives similar performance enhancments just like using list builders
       body: ProductsGrid(_showOnlyFavorites),
     );
