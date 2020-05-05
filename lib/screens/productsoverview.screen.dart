@@ -6,6 +6,7 @@ import '../screens/cart.screen.dart';
 import '../models/cart.model.dart';
 import '../widgets/badge.widget.dart';
 import '../widgets/appDrawer.widget.dart';
+import '../providers/products.provider.dart';
 
 enum FilterOptions { Favorites, All }
 
@@ -16,6 +17,26 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
+  var _isInit = false;
+  var _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    //note you cannot use async/await in init state or did change deps
+    // check if this lifecycle is running for the first time
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<ProductsProvider>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +70,22 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
               child: ch,
               value: cart.itemCount.toString(),
             ),
-            child:  IconButton(
-                icon: Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(CartScreen.routeName);
-                },
-              ),
+            child: IconButton(
+              icon: Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.of(context).pushNamed(CartScreen.routeName);
+              },
+            ),
           ),
         ],
       ),
       drawer: AppDrawer(),
       //using a grid view gives similar performance enhancments just like using list builders
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
