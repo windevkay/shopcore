@@ -37,15 +37,7 @@ class CartScreen extends StatelessWidget {
                     ),
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
-                  FlatButton(
-                    child: Text('Order Now'),
-                    onPressed: () {
-                      Provider.of<OrdersProvider>(context, listen: false).addOrder(cart.items.values.toList(), cart.totalAmount);
-                      //clear the cart
-                      cart.clear();
-                    },
-                    textColor: Theme.of(context).primaryColor,
-                  )
+                  OrderButton(cart: cart)
                 ],
               ),
             ),
@@ -56,7 +48,7 @@ class CartScreen extends StatelessWidget {
               itemCount: cart.itemCount,
               itemBuilder: (ctx, i) => CartItemWidget.CartItem(
                   cart.items.values.toList()[i].id,
-                  cart.items.keys.toList()[i],// product ids are keys
+                  cart.items.keys.toList()[i], // product ids are keys
                   cart.items.values.toList()[i].price,
                   cart.items.values.toList()[i].quantity,
                   cart.items.values.toList()[i].title),
@@ -64,6 +56,50 @@ class CartScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+//we extracted this widget so we can call setstate and we also dont need to rebuild more than just this button
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      child: _isLoading ? CircularProgressIndicator() : Text('Order Now'),
+      //if cart has no amount it means no active order can be placed, so disable button
+      //also disbale if loading is true
+      onPressed: (widget.cart.totalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await Provider.of<OrdersProvider>(context, listen: false)
+                  .addOrder(
+                widget.cart.items.values.toList(),
+                widget.cart.totalAmount,
+              );
+              setState(() {
+                _isLoading = false;
+              });
+              //clear the cart
+              widget.cart.clear();
+            },
+      textColor: Theme.of(context).primaryColor,
     );
   }
 }
