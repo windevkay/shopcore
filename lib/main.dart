@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 // screens
-import './screens/productsoverview.screen.dart';
+//import './screens/productsoverview.screen.dart';
 import './screens/orders.screen.dart';
 import './screens/productDetail.screen.dart';
 import './screens/cart.screen.dart';
 import './screens/userProducts.screen.dart';
 import './screens/editProduct.screen.dart';
+import './screens/auth_screen.dart';
 // providers
 import './providers/products.provider.dart';
 import './providers/orders.provider.dart';
@@ -40,13 +41,13 @@ class MyApp extends StatelessWidget {
               primarySwatch: Colors.pink,
               accentColor: Colors.amber,
               fontFamily: 'Lato'),
-          home: ProductsOverviewScreen(),
+          home: AuthScreen(),
           routes: {
             ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
             CartScreen.routeName: (ctx) => CartScreen(),
             OrdersScreen.routeName: (ctx) => OrdersScreen(),
             UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
-            EditProductScreen.routeName: (ctx) => EditProductScreen()
+            EditProductScreen.routeName: (ctx) => EditProductScreen(),
           }),
     );
   }
