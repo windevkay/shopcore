@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import '../screens/productDetail.screen.dart';
 import '../models/cart.model.dart';
 import '../models/product.dart';
+import '../providers/auth.provider.dart';
 
 class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<AuthProvider>(context, listen: false);
     //we set listen to false above because we only want the favorite button below be the one to react to changes
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -33,7 +35,7 @@ class ProductItem extends StatelessWidget {
               icon: Icon(
                   product.isFavorite ? Icons.favorite : Icons.favorite_border),
               onPressed: () {
-                product.toggleFavoriteStatus();
+                product.toggleFavoriteStatus(authData.token);
               },
               color: Theme.of(context).accentColor,
             ),
