@@ -22,13 +22,20 @@ class OrdersProvider with ChangeNotifier {
   List<OrderItem> _orders = [];
 
   var authToken = '';
+  var userId = '';
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
+  // call this from main to set authToken and userId with values from the auth provider
+  void updateProperties(String tokenValue, String userIdValue){
+    authToken = tokenValue;
+    userId = userIdValue;
+  }
+
   Future<void> fetchAndSetOrders() async {
-    final url = 'https://shopcore-ee439.firebaseio.com/orders.json?auth=$authToken';
+    final url = 'https://shopcore-ee439.firebaseio.com/orders/$userId.json?auth=$authToken';
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -55,7 +62,7 @@ class OrdersProvider with ChangeNotifier {
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
-    final url = 'https://shopcore-ee439.firebaseio.com/orders.json?auth=$authToken';
+    final url = 'https://shopcore-ee439.firebaseio.com/orders/$userId.json?auth=$authToken';
     final timeStamp = DateTime.now();
     final response = await http.post(url,
         body: json.encode({

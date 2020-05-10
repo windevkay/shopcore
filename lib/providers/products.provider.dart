@@ -10,9 +10,17 @@ class ProductsProvider with ChangeNotifier {
   List<Product> _items = [];
 
   var authToken = '';
+  var userId = '';
 
-  //final String authToken;
-  //ProductsProvider(this.authToken, this._items);
+  // final String authToken;
+  // final String userId;
+  // ProductsProvider(this.authToken, this.userId);
+
+  // call this from main to set authToken and userId with values from the auth provider
+  void updateProperties(String tokenValue, String userIdValue){
+    authToken = tokenValue;
+    userId = userIdValue;
+  }
 
   List<Product> get items {
     //we would use the spread operator here so we dont just return a direct reference in memory to _items
@@ -32,9 +40,11 @@ class ProductsProvider with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
+  //the pattern of arguments below represents how to pass optional args, they however need a default value
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     //auth tokens needed for requests can be attached as params to the url
-    final url = 'https://shopcore-ee439.firebaseio.com/products.json?auth=$authToken';
+    final url = 'https://shopcore-ee439.firebaseio.com/products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
       //FYI is our api needed a token for requests to be on a header, there is a header property available in http.get
@@ -42,6 +52,11 @@ class ProductsProvider with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+      //fetch product favorites
+      final favoritesUrl = 'https://shopcore-ee439.firebaseio.com/userFavorites/$userId.json?auth=$authToken';
+      final favoritesResponse = await http.get(favoritesUrl);
+      final favoritesData = json.decode(favoritesResponse.body);
+
       final List<Product> loadedProducts = [];
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -49,7 +64,9 @@ class ProductsProvider with ChangeNotifier {
             title: prodData['title'],
             description: prodData['description'],
             price: prodData['price'],
-            isFavorite: prodData['isFavorite'],
+            // below is sort of an extended ternary
+            //in this case, if favoritesData[prodId] is null, it will simply be set to false
+            isFavorite: favoritesData == null ? false : favoritesData[prodId] ?? false,
             imageUrl: prodData['imageUrl']));
       });
       _items = loadedProducts;
@@ -68,7 +85,7 @@ class ProductsProvider with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
-            'isFavorite': product.isFavorite
+            'creatorId': userId
           }));
 
       final newProduct = Product(

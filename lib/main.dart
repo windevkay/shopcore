@@ -9,6 +9,7 @@ import './screens/cart.screen.dart';
 import './screens/userProducts.screen.dart';
 import './screens/editProduct.screen.dart';
 import './screens/auth_screen.dart';
+import './screens/splashScreen.screen.dart';
 // providers
 import './providers/products.provider.dart';
 import './providers/orders.provider.dart';
@@ -19,6 +20,7 @@ import './models/cart.model.dart';
 //void main() => runApp(MyApp());
 
 Future main() async {
+  // load environment variables
   await DotEnv().load('.env');
   return runApp(MyApp());
 }
@@ -43,7 +45,9 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProxyProvider<AuthProvider, ProductsProvider>(
             create: (_) => ProductsProvider(),
             update: (ctx, auth, previousProductsProvider) =>
-                previousProductsProvider..authToken = auth.token,
+                // products provider has multiple properties depending on auth so we use this pattern
+                previousProductsProvider
+                  ..updateProperties(auth.token, auth.userId),
           ),
           ChangeNotifierProvider(
             create: (ctx) => Cart(),
@@ -51,7 +55,9 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProxyProvider<AuthProvider, OrdersProvider>(
             create: (_) => OrdersProvider(),
             update: (ctx, auth, previousOrdersProvider) =>
-                previousOrdersProvider..authToken = auth.token,
+                //previousOrdersProvider..authToken = auth.token,
+                previousOrdersProvider
+                  ..updateProperties(auth.token, auth.userId),
           ),
         ],
         child: Consumer<AuthProvider>(
@@ -63,7 +69,16 @@ class MyApp extends StatelessWidget {
                   accentColor: Colors.amber,
                   fontFamily: 'Lato'),
               // decide initial screen based on login status
-              home: auth.isAuth ? ProductsOverviewScreen() : AuthScreen(),
+              home: auth.isAuth
+                  ? ProductsOverviewScreen()
+                  : FutureBuilder(
+                      //use this pattern to try to auto relogin, if that isnt possible then show auth screen
+                      future: auth.tryAutoLogin(),
+                      builder: (ctx, authResultSnapshot) =>
+                          authResultSnapshot.connectionState ==
+                                  ConnectionState.waiting
+                              ? SplashScreen()
+                              : AuthScreen()),
               routes: {
                 ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
                 CartScreen.routeName: (ctx) => CartScreen(),
