@@ -16,6 +16,8 @@ import './providers/orders.provider.dart';
 import './providers/auth.provider.dart';
 // models
 import './models/cart.model.dart';
+//helpers
+import './helpers/customRoute.helper.dart';
 
 //void main() => runApp(MyApp());
 
@@ -67,7 +69,14 @@ class MyApp extends StatelessWidget {
               theme: ThemeData(
                   primarySwatch: Colors.pink,
                   accentColor: Colors.amber,
-                  fontFamily: 'Lato'),
+                  fontFamily: 'Lato',
+                  //using an optional app-wide screen transition theme
+                  pageTransitionsTheme: PageTransitionsTheme(
+                    builders: {
+                      TargetPlatform.android: CustomPageTransitionBuilder(),
+                      TargetPlatform.iOS: CustomPageTransitionBuilder()
+                    },
+                  )),
               // decide initial screen based on login status
               home: auth.isAuth
                   ? ProductsOverviewScreen()

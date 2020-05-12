@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../screens/orders.screen.dart';
+//import '../helpers/customRoute.helper.dart';
 import '../screens/userProducts.screen.dart';
 import '../providers/auth.provider.dart';
 
@@ -28,8 +29,9 @@ class AppDrawer extends StatelessWidget {
             leading: Icon(Icons.payment),
             title: Text('Orders'),
             onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(OrdersScreen.routeName);
+              Navigator.of(context).pushReplacementNamed(OrdersScreen.routeName);
+              //below is how to use a custom route animation on a single route
+              //Navigator.of(context).pushReplacement(CustomRoute(builder: (ctx) => OrdersScreen()));
             },
           ),
           Divider(),

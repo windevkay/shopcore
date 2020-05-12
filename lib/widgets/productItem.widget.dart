@@ -17,15 +17,18 @@ class ProductItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: GridTile(
         child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
-                arguments: product.id);
-          },
-          child: Image.network(
-            product.imageUrl,
-            fit: BoxFit.cover,
-          ),
-        ),
+            onTap: () {
+              Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
+                  arguments: product.id);
+            },
+            child: Hero(// the screen where this goes to also needs a Hero
+              tag: product.id,
+              child: FadeInImage(
+                placeholder: AssetImage('assets/images/original.png'),
+                image: NetworkImage(product.imageUrl),
+                fit: BoxFit.cover,
+              ),
+            )),
         footer: GridTileBar(
           backgroundColor: Colors.black87,
           //using the consumer below is similar to using provider.of
@@ -50,11 +53,16 @@ class ProductItem extends StatelessWidget {
               cart.addItem(product.id, product.price, product.title);
               Scaffold.of(context).hideCurrentSnackBar();
               Scaffold.of(context).showSnackBar(SnackBar(
-                content: Text('Added item to cart!',),
+                content: Text(
+                  'Added item to cart!',
+                ),
                 duration: Duration(seconds: 2),
-                action: SnackBarAction(label: 'UNDO', onPressed: () {
-                  cart.removeSingleItem(product.id);
-                },),
+                action: SnackBarAction(
+                  label: 'UNDO',
+                  onPressed: () {
+                    cart.removeSingleItem(product.id);
+                  },
+                ),
               ));
             },
             color: Theme.of(context).accentColor,
